@@ -282,6 +282,12 @@ sites:
     port: 22
     check: "tcp-ping"
 
+  - name: redis.forwardemail.net
+    url: redis.forwardemail.net
+    icon: https://redis.io/favicon.ico
+    port: 22
+    check: "tcp-ping"
+
   - name: sqlite.forwardemail.net
     url: sqlite.forwardemail.net
     icon: https://sqlite.org/favicon.ico
