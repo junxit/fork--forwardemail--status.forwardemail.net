@@ -6,9 +6,9 @@
     "slug": "https-forwardemail-net-curl",
     "status": "up",
     "uptime": "99.92%",
-    "uptimeDay": "99.33%",
-    "uptimeWeek": "99.90%",
-    "uptimeMonth": "99.68%",
+    "uptimeDay": "100.00%",
+    "uptimeWeek": "100.00%",
+    "uptimeMonth": "99.70%",
     "uptimeYear": "99.85%",
     "time": 1161,
     "timeDay": 652,
@@ -16,7 +16,6 @@
     "timeMonth": 609,
     "timeYear": 1356,
     "dailyMinutesDown": {
-      "2025-12-18": 10,
       "2025-12-02": 80,
       "2025-11-28": 22,
       "2025-11-25": 29,
@@ -689,18 +688,20 @@
     "url": "pop3.forwardemail.net",
     "icon": "https://raw.githubusercontent.com/forwardemail/forwardemail.net/master/assets/img/favicon.ico",
     "slug": "pop3-forwardemail-net-995-i-pv4",
-    "status": "up",
+    "status": "down",
     "uptime": "100.00%",
-    "uptimeDay": "100.00%",
-    "uptimeWeek": "100.00%",
-    "uptimeMonth": "100.00%",
+    "uptimeDay": "99.84%",
+    "uptimeWeek": "99.98%",
+    "uptimeMonth": "99.99%",
     "uptimeYear": "100.00%",
     "time": 48,
     "timeDay": 68,
     "timeWeek": 49,
     "timeMonth": 45,
     "timeYear": 47,
-    "dailyMinutesDown": {}
+    "dailyMinutesDown": {
+      "2025-12-18": 2
+    }
   },
   {
     "name": "pop3.forwardemail.net:995 (IPv6)",
