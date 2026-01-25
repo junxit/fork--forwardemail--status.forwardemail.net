@@ -1,48 +1,40 @@
 name: External Mail Provider Monitor
-
 on:
   schedule:
-    # Run every 10 minutes
-    - cron: '*/10 * * * *'
+    - cron: "*/10 * * * *"
+  repository_dispatch:
+    types: [external-mail-monitor]
   workflow_dispatch:
-    # Allow manual trigger
-
 permissions:
   contents: write
   issues: write
-
 jobs:
   monitor:
+    name: Check external mail status
     runs-on: ubuntu-latest
     timeout-minutes: 10
-
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          ref: ${{ github.head_ref }}
           token: ${{ secrets.GH_PAT || github.token }}
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
-
+          node-version: "20"
+          cache: "npm"
       - name: Install dependencies
         run: npm ci --ignore-scripts || npm install
-
       - name: Run external mail monitor
         env:
           GH_PAT: ${{ secrets.GH_PAT || github.token }}
           GITHUB_TOKEN: ${{ secrets.GH_PAT || github.token }}
         run: node scripts/external-mail-monitor.js
-
       - name: Configure Git
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-
       - name: Commit state file
         run: |
           if [ -f .external-mail-status.json ]; then
@@ -55,4 +47,4 @@ jobs:
             fi
           fi
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT || github.token }}
+          GH_PAT: ${{ secrets.GH_PAT || github.token }}
