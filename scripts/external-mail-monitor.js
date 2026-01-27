@@ -50,11 +50,12 @@ const CONFIG = {
 };
 
 /**
- * Fetch data from a URL
+ * Fetch data from a URL with retry logic
  * @param {string} url - URL to fetch
+ * @param {number} retries - Number of retries remaining
  * @returns {Promise<string>} - Response body
  */
-function fetchUrl(url) {
+function fetchUrl(url, retries = 3) {
   return new Promise((resolve, reject) => {
     const client = url.startsWith('https') ? https : http;
     const request = client.get(url, {
@@ -64,12 +65,20 @@ function fetchUrl(url) {
       }
     }, (response) => {
       if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
-        fetchUrl(response.headers.location).then(resolve).catch(reject);
+        fetchUrl(response.headers.location, retries).then(resolve).catch(reject);
         return;
       }
 
       if (response.statusCode !== 200) {
-        reject(new Error(`HTTP ${response.statusCode} for ${url}`));
+        const error = new Error(`HTTP ${response.statusCode} for ${url}`);
+        if (retries > 0) {
+          console.log(`Retrying ${url} (${retries} retries left)...`);
+          setTimeout(() => {
+            fetchUrl(url, retries - 1).then(resolve).catch(reject);
+          }, 1000);
+          return;
+        }
+        reject(error);
         return;
       }
 
@@ -80,10 +89,27 @@ function fetchUrl(url) {
       response.on('end', () => resolve(data));
       response.on('error', reject);
     });
-    request.on('error', reject);
+    request.on('error', (error) => {
+      if (retries > 0) {
+        console.log(`Retrying ${url} after error (${retries} retries left)...`);
+        setTimeout(() => {
+          fetchUrl(url, retries - 1).then(resolve).catch(reject);
+        }, 1000);
+        return;
+      }
+      reject(error);
+    });
     request.setTimeout(30_000, () => {
       request.destroy();
-      reject(new Error(`Timeout fetching ${url}`));
+      const error = new Error(`Timeout fetching ${url}`);
+      if (retries > 0) {
+        console.log(`Retrying ${url} after timeout (${retries} retries left)...`);
+        setTimeout(() => {
+          fetchUrl(url, retries - 1).then(resolve).catch(reject);
+        }, 1000);
+        return;
+      }
+      reject(error);
     });
   });
 }
@@ -134,6 +160,7 @@ async function parseGoogleFeed() {
     const parsed = await parseXml(data);
 
     if (!parsed.feed || !parsed.feed.entry) {
+      console.log('Google feed: No entries found');
       return incidents;
     }
 
@@ -220,6 +247,7 @@ async function parseAppleFeed() {
     const parsed = JSON.parse(jsonStr);
 
     if (!parsed.services) {
+      console.log('Apple feed: No services found');
       return incidents;
     }
 
@@ -248,7 +276,7 @@ async function parseAppleFeed() {
         incidents.push({
           provider: 'apple',
           service: 'iCloud Mail',
-          id: event.messageId,
+          id: event.messageId || `apple-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
           title: `iCloud Mail ${event.statusType || 'Issue'}`,
           description: event.message || 'iCloud Mail service issue detected.',
           link: 'https://www.apple.com/support/systemstatus/',
@@ -280,6 +308,7 @@ async function parseMicrosoftFeed() {
     const parsed = await parseXml(data);
 
     if (!parsed.rss || !parsed.rss.channel || !parsed.rss.channel.item) {
+      console.log('Microsoft feed: No items found');
       return incidents;
     }
 
@@ -307,11 +336,10 @@ async function parseMicrosoftFeed() {
         incidents.push({
           provider: 'microsoft',
           service: 'Outlook.com / Microsoft 365',
-          id: item.guid?._ || item.guid || `ms-${Date.now()}`,
+          id: item.guid?._ || item.guid || `ms-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
           title: title.slice(0, 200),
           description: description.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 1000),
           link: item.link || 'https://status.cloud.microsoft/',
-          startTime: item.pubDate,
           updated: item.pubDate,
           isResolved: false,
           status
@@ -326,13 +354,14 @@ async function parseMicrosoftFeed() {
 }
 
 /**
- * GitHub API request helper
+ * GitHub API request helper with retry logic
  * @param {string} method - HTTP method
  * @param {string} apiPath - API path
  * @param {object} body - Request body
+ * @param {number} retries - Number of retries remaining
  * @returns {Promise<object>} - Response data
  */
-async function githubApi(method, apiPath, body = null) {
+async function githubApi(method, apiPath, body = null, retries = 3) {
   const token = process.env.GH_PAT || process.env.GITHUB_TOKEN;
   if (!token) {
     throw new Error('GitHub token not found. Set GH_PAT or GITHUB_TOKEN environment variable.');
@@ -361,7 +390,19 @@ async function githubApi(method, apiPath, body = null) {
         try {
           const parsed = data ? JSON.parse(data) : {};
           if (res.statusCode >= 400) {
-            reject(new Error(`GitHub API error ${res.statusCode}: ${parsed.message || data}`));
+            const error = new Error(`GitHub API error ${res.statusCode}: ${parsed.message || data}`);
+            error.statusCode = res.statusCode;
+            
+            // Retry on 5xx errors or rate limiting (403/429)
+            if (retries > 0 && (res.statusCode >= 500 || res.statusCode === 429 || res.statusCode === 403)) {
+              console.log(`GitHub API error ${res.statusCode}, retrying (${retries} retries left)...`);
+              setTimeout(() => {
+                githubApi(method, apiPath, body, retries - 1).then(resolve).catch(reject);
+              }, 2000);
+              return;
+            }
+            
+            reject(error);
           } else {
             resolve(parsed);
           }
@@ -371,10 +412,28 @@ async function githubApi(method, apiPath, body = null) {
       });
     });
 
-    req.on('error', reject);
+    req.on('error', (error) => {
+      if (retries > 0) {
+        console.log(`GitHub API network error, retrying (${retries} retries left)...`);
+        setTimeout(() => {
+          githubApi(method, apiPath, body, retries - 1).then(resolve).catch(reject);
+        }, 2000);
+        return;
+      }
+      reject(error);
+    });
+    
     req.setTimeout(30_000, () => {
       req.destroy();
-      reject(new Error('GitHub API timeout'));
+      const error = new Error('GitHub API timeout');
+      if (retries > 0) {
+        console.log(`GitHub API timeout, retrying (${retries} retries left)...`);
+        setTimeout(() => {
+          githubApi(method, apiPath, body, retries - 1).then(resolve).catch(reject);
+        }, 2000);
+        return;
+      }
+      reject(error);
     });
 
     if (body) {
@@ -386,12 +445,38 @@ async function githubApi(method, apiPath, body = null) {
 }
 
 /**
+ * Check if a GitHub issue exists and is accessible
+ * @param {number} issueNumber - Issue number to check
+ * @returns {Promise<object|null>} - Issue data or null if not found
+ */
+async function getIssue(issueNumber) {
+  if (!issueNumber || typeof issueNumber !== 'number') {
+    return null;
+  }
+  
+  try {
+    const issue = await githubApi('GET', `/repos/${CONFIG.owner}/${CONFIG.repo}/issues/${issueNumber}`);
+    return issue;
+  } catch (error) {
+    if (error.statusCode === 404) {
+      console.log(`Issue #${issueNumber} not found`);
+      return null;
+    }
+    throw error;
+  }
+}
+
+/**
  * Search for existing issue by incident ID
  * @param {string} incidentId - External incident ID
  * @param {string} provider - Provider name
  * @returns {Promise<object|null>} - Existing issue or null
  */
 async function findExistingIssue(incidentId, provider) {
+  if (!incidentId || !provider) {
+    return null;
+  }
+  
   try {
     const searchQuery = encodeURIComponent(
       `repo:${CONFIG.owner}/${CONFIG.repo} is:issue label:maintenance "${provider}" "${incidentId}" in:body`
@@ -467,9 +552,28 @@ async function createIssue(incident) {
  * @param {number} issueNumber - Issue number
  * @param {object} incident - Incident data
  * @param {boolean} shouldClose - Whether to close the issue
- * @returns {Promise<void>}
+ * @returns {Promise<boolean>} - True if update was successful
  */
 async function updateIssue(issueNumber, incident, shouldClose = false) {
+  // Validate issue number - must be a positive integer
+  if (typeof issueNumber !== 'number' || !Number.isInteger(issueNumber) || issueNumber <= 0) {
+    console.log(`Invalid issue number: ${issueNumber}, skipping update`);
+    return false;
+  }
+  
+  // Verify the issue exists before trying to update
+  const existingIssue = await getIssue(issueNumber);
+  if (!existingIssue) {
+    console.log(`Issue #${issueNumber} does not exist, skipping update`);
+    return false;
+  }
+  
+  // Check if issue is already closed
+  if (existingIssue.state === 'closed' && shouldClose) {
+    console.log(`Issue #${issueNumber} is already closed, skipping update`);
+    return true;
+  }
+  
   // Add a comment with the update
   let comment = `## Status Update\n\n`;
   comment += `**Time:** ${new Date().toISOString()}\n`;
@@ -487,19 +591,61 @@ async function updateIssue(issueNumber, incident, shouldClose = false) {
     comment += `---\n\nThe ${incident.service} incident has been resolved.`;
   }
 
-  await githubApi('POST', `/repos/${CONFIG.owner}/${CONFIG.repo}/issues/${issueNumber}/comments`, {
-    body: comment
-  });
-
-  if (shouldClose) {
-    await githubApi('PATCH', `/repos/${CONFIG.owner}/${CONFIG.repo}/issues/${issueNumber}`, {
-      state: 'closed',
-      state_reason: 'completed'
+  try {
+    await githubApi('POST', `/repos/${CONFIG.owner}/${CONFIG.repo}/issues/${issueNumber}/comments`, {
+      body: comment
     });
-    console.log(`Closed issue #${issueNumber} - incident resolved`);
-  } else {
-    console.log(`Updated issue #${issueNumber} with latest status`);
+
+    if (shouldClose) {
+      await githubApi('PATCH', `/repos/${CONFIG.owner}/${CONFIG.repo}/issues/${issueNumber}`, {
+        state: 'closed',
+        state_reason: 'completed'
+      });
+      console.log(`Closed issue #${issueNumber} - incident resolved`);
+    } else {
+      console.log(`Updated issue #${issueNumber} with latest status`);
+    }
+    
+    return true;
+  } catch (error) {
+    console.error(`Failed to update issue #${issueNumber}:`, error.message);
+    return false;
   }
+}
+
+/**
+ * Validate state object structure
+ * @param {object} state - State object to validate
+ * @returns {object} - Validated and sanitized state
+ */
+function validateState(state) {
+  const validState = {
+    incidents: {},
+    lastRun: null
+  };
+  
+  if (!state || typeof state !== 'object') {
+    return validState;
+  }
+  
+  validState.lastRun = state.lastRun || null;
+  
+  if (state.incidents && typeof state.incidents === 'object') {
+    for (const [key, value] of Object.entries(state.incidents)) {
+      // Validate each incident entry
+      if (value && typeof value === 'object') {
+        validState.incidents[key] = {
+          issueNumber: typeof value.issueNumber === 'number' ? value.issueNumber : null,
+          isResolved: Boolean(value.isResolved),
+          createdAt: value.createdAt || null,
+          lastUpdate: value.lastUpdate || null,
+          resolvedAt: value.resolvedAt || null
+        };
+      }
+    }
+  }
+  
+  return validState;
 }
 
 /**
@@ -510,7 +656,8 @@ function loadState() {
   try {
     const statePath = path.join(process.cwd(), CONFIG.stateFile);
     if (fs.existsSync(statePath)) {
-      return JSON.parse(fs.readFileSync(statePath, 'utf8'));
+      const rawState = JSON.parse(fs.readFileSync(statePath, 'utf8'));
+      return validateState(rawState);
     }
   } catch (error) {
     console.error('Error loading state:', error.message);
@@ -526,7 +673,8 @@ function loadState() {
 function saveState(state) {
   try {
     const statePath = path.join(process.cwd(), CONFIG.stateFile);
-    fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
+    const validState = validateState(state);
+    fs.writeFileSync(statePath, JSON.stringify(validState, null, 2));
   } catch (error) {
     console.error('Error saving state:', error.message);
   }
@@ -540,56 +688,100 @@ async function monitor() {
 
   const state = loadState();
   const allIncidents = [];
+  const errors = [];
 
-  // Fetch incidents from all providers
+  // Fetch incidents from all providers with error handling for each
   console.log('Checking Google Workspace status...');
-  const googleIncidents = await parseGoogleFeed();
-  allIncidents.push(...googleIncidents);
+  try {
+    const googleIncidents = await parseGoogleFeed();
+    allIncidents.push(...googleIncidents);
+    console.log(`  Found ${googleIncidents.length} Gmail incident(s)`);
+  } catch (error) {
+    console.error('  Failed to check Google:', error.message);
+    errors.push({ provider: 'google', error: error.message });
+  }
 
   console.log('Checking Apple System Status...');
-  const appleIncidents = await parseAppleFeed();
-  allIncidents.push(...appleIncidents);
+  try {
+    const appleIncidents = await parseAppleFeed();
+    allIncidents.push(...appleIncidents);
+    console.log(`  Found ${appleIncidents.length} iCloud Mail incident(s)`);
+  } catch (error) {
+    console.error('  Failed to check Apple:', error.message);
+    errors.push({ provider: 'apple', error: error.message });
+  }
 
   console.log('Checking Microsoft Status...');
-  const microsoftIncidents = await parseMicrosoftFeed();
-  allIncidents.push(...microsoftIncidents);
+  try {
+    const microsoftIncidents = await parseMicrosoftFeed();
+    allIncidents.push(...microsoftIncidents);
+    console.log(`  Found ${microsoftIncidents.length} Microsoft incident(s)`);
+  } catch (error) {
+    console.error('  Failed to check Microsoft:', error.message);
+    errors.push({ provider: 'microsoft', error: error.message });
+  }
 
-  console.log(`Found ${allIncidents.length} relevant incident(s)`);
+  console.log(`Found ${allIncidents.length} total relevant incident(s)`);
+  
+  // Log any errors but continue processing
+  if (errors.length > 0) {
+    console.log(`Warning: ${errors.length} provider(s) had errors but continuing with available data`);
+  }
 
   // Process each incident
   for (const incident of allIncidents) {
     const stateKey = `${incident.provider}-${incident.id}`;
     const previousState = state.incidents[stateKey];
 
-    // Check if we've already processed this incident
-    if (previousState) {
-      // If previously active and now resolved, update and close
-      if (!previousState.isResolved && incident.isResolved) {
-        console.log(`Incident ${stateKey} has been resolved`);
-        if (previousState.issueNumber) {
-          await updateIssue(previousState.issueNumber, incident, true);
+    try {
+      // Check if we've already processed this incident
+      if (previousState) {
+        // Skip if already resolved in our state
+        if (previousState.isResolved) {
+          console.log(`Incident ${stateKey} already resolved in state, skipping`);
+          continue;
         }
+        
+        // If previously active and now resolved, update and close
+        if (incident.isResolved) {
+          console.log(`Incident ${stateKey} has been resolved`);
+          
+          // Only try to update if we have a valid issue number (positive integer)
+          if (typeof previousState.issueNumber === 'number' && Number.isInteger(previousState.issueNumber) && previousState.issueNumber > 0) {
+            const updated = await updateIssue(previousState.issueNumber, incident, true);
+            if (updated) {
+              state.incidents[stateKey] = {
+                ...previousState,
+                isResolved: true,
+                resolvedAt: new Date().toISOString()
+              };
+            }
+          } else {
+            // No issue number, just mark as resolved in state
+            console.log(`No issue number for ${stateKey}, marking as resolved in state only`);
+            state.incidents[stateKey] = {
+              ...previousState,
+              isResolved: true,
+              resolvedAt: new Date().toISOString()
+            };
+          }
+        } else {
+          // Still active, check if we should update
+          const lastUpdate = new Date(previousState.lastUpdate || 0);
+          const hoursSinceUpdate = (Date.now() - lastUpdate.getTime()) / (1000 * 60 * 60);
 
-        state.incidents[stateKey] = {
-          ...previousState,
-          isResolved: true,
-          resolvedAt: new Date().toISOString()
-        };
+          // Update every 2 hours for ongoing incidents
+          if (hoursSinceUpdate >= 2 && typeof previousState.issueNumber === 'number' && Number.isInteger(previousState.issueNumber) && previousState.issueNumber > 0) {
+            const updated = await updateIssue(previousState.issueNumber, incident, false);
+            if (updated) {
+              state.incidents[stateKey].lastUpdate = new Date().toISOString();
+            }
+          }
+        }
       } else if (!incident.isResolved) {
-        // Still active, check if we should update
-        const lastUpdate = new Date(previousState.lastUpdate || 0);
-        const hoursSinceUpdate = (Date.now() - lastUpdate.getTime()) / (1000 * 60 * 60);
-
-        // Update every 2 hours for ongoing incidents
-        if (hoursSinceUpdate >= 2 && previousState.issueNumber) {
-          await updateIssue(previousState.issueNumber, incident, false);
-          state.incidents[stateKey].lastUpdate = new Date().toISOString();
-        }
-      }
-    } else if (!incident.isResolved) {
-      // New active incident - create issue
-      console.log(`New incident detected: ${stateKey}`);
-      try {
+        // New active incident - create issue
+        console.log(`New incident detected: ${stateKey}`);
+        
         // First check if issue already exists (in case state was lost)
         const existingIssue = await findExistingIssue(incident.id, incident.provider);
 
@@ -597,7 +789,7 @@ async function monitor() {
           console.log(`Found existing issue #${existingIssue.number} for incident ${stateKey}`);
           state.incidents[stateKey] = {
             issueNumber: existingIssue.number,
-            isResolved: false,
+            isResolved: existingIssue.state === 'closed',
             createdAt: existingIssue.created_at,
             lastUpdate: new Date().toISOString()
           };
@@ -610,9 +802,19 @@ async function monitor() {
             lastUpdate: new Date().toISOString()
           };
         }
-      } catch (error) {
-        console.error(`Failed to create issue for ${stateKey}:`, error.message);
+      } else {
+        // New incident that's already resolved - just track it without creating an issue
+        console.log(`Incident ${stateKey} is already resolved, tracking without creating issue`);
+        state.incidents[stateKey] = {
+          issueNumber: null,
+          isResolved: true,
+          createdAt: new Date().toISOString(),
+          resolvedAt: new Date().toISOString()
+        };
       }
+    } catch (error) {
+      console.error(`Failed to process incident ${stateKey}:`, error.message);
+      // Continue processing other incidents
     }
   }
 
@@ -620,6 +822,7 @@ async function monitor() {
   const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
   for (const [key, value] of Object.entries(state.incidents)) {
     if (value.isResolved && new Date(value.resolvedAt || 0).getTime() < sevenDaysAgo) {
+      console.log(`Cleaning up old resolved incident: ${key}`);
       delete state.incidents[key];
     }
   }
@@ -628,6 +831,11 @@ async function monitor() {
   saveState(state);
 
   console.log(`[${new Date().toISOString()}] Status check complete`);
+  
+  // Only fail if all providers failed
+  if (errors.length === 3) {
+    throw new Error('All provider checks failed');
+  }
 }
 
 // Run the monitor
