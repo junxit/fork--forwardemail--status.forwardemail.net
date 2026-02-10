@@ -13,7 +13,14 @@
       "createdAt": "2026-02-10T15:17:15.366Z",
       "lastUpdate": "2026-02-10T15:17:15.366Z",
       "resolvedAt": null
+    },
+    "microsoft-cd07e22d-d393-40d1-b5eb-fac46006a920": {
+      "issueNumber": 2419,
+      "isResolved": false,
+      "createdAt": "2026-02-10T15:46:00.646Z",
+      "lastUpdate": "2026-02-10T15:46:00.646Z",
+      "resolvedAt": null
     }
   },
-  "lastRun": "2026-02-10T15:17:15.366Z"
+  "lastRun": "2026-02-10T15:46:00.646Z"
 }
