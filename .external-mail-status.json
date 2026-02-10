@@ -34,7 +34,14 @@
       "createdAt": "2026-02-10T17:15:10.123Z",
       "lastUpdate": "2026-02-10T17:15:10.123Z",
       "resolvedAt": null
+    },
+    "apple-2000005140": {
+      "issueNumber": 2422,
+      "isResolved": false,
+      "createdAt": "2026-02-10T20:49:56.936Z",
+      "lastUpdate": "2026-02-10T20:49:56.936Z",
+      "resolvedAt": null
     }
   },
-  "lastRun": "2026-02-10T20:26:54.401Z"
+  "lastRun": "2026-02-10T20:49:56.936Z"
 }
