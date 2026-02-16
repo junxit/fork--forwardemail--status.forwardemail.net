@@ -333,6 +333,11 @@ async function parseMicrosoftFeed() {
       const isOutage = status.toLowerCase() !== 'available';
 
       if (isOutage || isMailRelated) {
+        // Determine resolution status from the feed status field
+        const isResolved = status.toLowerCase() === 'resolved' ||
+                          status.toLowerCase() === 'service restored' ||
+                          status.toLowerCase() === 'available';
+
         incidents.push({
           provider: 'microsoft',
           service: 'Outlook.com / Microsoft 365',
@@ -341,7 +346,7 @@ async function parseMicrosoftFeed() {
           description: description.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 1000),
           link: item.link || 'https://status.cloud.microsoft/',
           updated: item.pubDate,
-          isResolved: false,
+          isResolved,
           status
         });
       }
@@ -815,6 +820,74 @@ async function monitor() {
     } catch (error) {
       console.error(`Failed to process incident ${stateKey}:`, error.message);
       // Continue processing other incidents
+    }
+  }
+
+  // Detect Microsoft incidents that have disappeared from the feed (resolved)
+  // Microsoft's feed removes incidents once resolved, so absence = resolution
+  const activeMicrosoftIds = new Set(
+    allIncidents
+      .filter((i) => i.provider === 'microsoft')
+      .map((i) => i.id)
+  );
+  const microsoftFailed = errors.some((e) => e.provider === 'microsoft');
+
+  if (!microsoftFailed) {
+    for (const [key, value] of Object.entries(state.incidents)) {
+      if (
+        key.startsWith('microsoft-') &&
+        !value.isResolved &&
+        !activeMicrosoftIds.has(key.replace('microsoft-', ''))
+      ) {
+        console.log(
+          `Microsoft incident ${key} no longer in feed, marking as resolved`
+        );
+
+        const resolvedIncident = {
+          provider: 'microsoft',
+          service: 'Outlook.com / Microsoft 365',
+          id: key.replace('microsoft-', ''),
+          title: 'Outlook.com / Microsoft 365 incident resolved',
+          description:
+            'This incident is no longer listed in the Microsoft status feed, indicating it has been resolved.',
+          isResolved: true
+        };
+
+        if (
+          typeof value.issueNumber === 'number' &&
+          Number.isInteger(value.issueNumber) &&
+          value.issueNumber > 0
+        ) {
+          try {
+            const updated = await updateIssue(
+              value.issueNumber,
+              resolvedIncident,
+              true
+            );
+            if (updated) {
+              state.incidents[key] = {
+                ...value,
+                isResolved: true,
+                resolvedAt: new Date().toISOString()
+              };
+            }
+          } catch (error) {
+            console.error(
+              `Failed to close issue for disappeared Microsoft incident ${key}:`,
+              error.message
+            );
+          }
+        } else {
+          console.log(
+            `No issue number for ${key}, marking as resolved in state only`
+          );
+          state.incidents[key] = {
+            ...value,
+            isResolved: true,
+            resolvedAt: new Date().toISOString()
+          };
+        }
+      }
     }
   }
 
