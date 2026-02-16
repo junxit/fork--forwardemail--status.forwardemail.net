@@ -438,10 +438,10 @@
     "url": "smtp.forwardemail.net",
     "icon": "https://raw.githubusercontent.com/forwardemail/forwardemail.net/master/assets/img/favicon.ico",
     "slug": "smtp-forwardemail-net-25-i-pv4",
-    "status": "up",
+    "status": "down",
     "uptime": "99.98%",
-    "uptimeDay": "100.00%",
-    "uptimeWeek": "100.00%",
+    "uptimeDay": "99.92%",
+    "uptimeWeek": "99.99%",
     "uptimeMonth": "100.00%",
     "uptimeYear": "99.98%",
     "time": 46,
@@ -450,6 +450,7 @@
     "timeMonth": 42,
     "timeYear": 47,
     "dailyMinutesDown": {
+      "2026-02-16": 1,
       "2025-10-15": 15,
       "2025-10-11": 20,
       "2025-09-21": 37,
@@ -970,7 +971,7 @@
     "time": 46,
     "timeDay": 59,
     "timeWeek": 43,
-    "timeMonth": 44,
+    "timeMonth": 45,
     "timeYear": 46,
     "dailyMinutesDown": {
       "2025-09-21": 558,
@@ -991,7 +992,7 @@
     "time": 47,
     "timeDay": 54,
     "timeWeek": 45,
-    "timeMonth": 45,
+    "timeMonth": 46,
     "timeYear": 47,
     "dailyMinutesDown": {}
   },
@@ -1045,7 +1046,7 @@
     "time": 47,
     "timeDay": 58,
     "timeWeek": 44,
-    "timeMonth": 44,
+    "timeMonth": 45,
     "timeYear": 47,
     "dailyMinutesDown": {}
   },
@@ -1063,7 +1064,7 @@
     "time": 48,
     "timeDay": 66,
     "timeWeek": 43,
-    "timeMonth": 45,
+    "timeMonth": 46,
     "timeYear": 47,
     "dailyMinutesDown": {}
   },
@@ -1101,7 +1102,7 @@
     "time": 47,
     "timeDay": 58,
     "timeWeek": 42,
-    "timeMonth": 44,
+    "timeMonth": 45,
     "timeYear": 47,
     "dailyMinutesDown": {}
   },
