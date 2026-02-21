@@ -1090,18 +1090,20 @@
     "url": "mongo.forwardemail.net",
     "icon": "https://www.mongodb.com/favicon.ico",
     "slug": "mongo-forwardemail-net",
-    "status": "up",
+    "status": "down",
     "uptime": "100.00%",
-    "uptimeDay": "100.00%",
-    "uptimeWeek": "100.00%",
-    "uptimeMonth": "100.00%",
+    "uptimeDay": "99.84%",
+    "uptimeWeek": "99.98%",
+    "uptimeMonth": "99.99%",
     "uptimeYear": "100.00%",
     "time": 46,
     "timeDay": 50,
     "timeWeek": 43,
     "timeMonth": 46,
     "timeYear": 46,
-    "dailyMinutesDown": {}
+    "dailyMinutesDown": {
+      "2026-02-21": 2
+    }
   },
   {
     "name": "sqlite.forwardemail.net",
