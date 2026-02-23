@@ -23,11 +23,11 @@
     },
     "microsoft-9a5e65b5-a27b-43c5-bba2-6dc7da0a74ee": {
       "issueNumber": 2430,
-      "isResolved": false,
+      "isResolved": true,
       "createdAt": "2026-02-23T16:49:20.135Z",
       "lastUpdate": "2026-02-23T16:49:20.135Z",
-      "resolvedAt": null
+      "resolvedAt": "2026-02-23T17:46:13.721Z"
     }
   },
-  "lastRun": "2026-02-23T17:18:53.877Z"
+  "lastRun": "2026-02-23T17:46:13.721Z"
 }
