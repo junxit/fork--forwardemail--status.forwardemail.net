@@ -317,15 +317,15 @@ sites:
     port: 22
     check: "tcp-ping"
 
-  - name: sqlite.forwardemail.net
-    url: sqlite.forwardemail.net
-    icon: https://sqlite.org/favicon.ico
+  - name: logs.forwardemail.net
+    url: logs.forwardemail.net
+    icon: https://www.mongodb.com/favicon.ico
     port: 22
     check: "tcp-ping"
 
-  - name: logs.forwardemail.net
-    url: logs.forwardemail.net
-    icon: https://raw.githubusercontent.com/forwardemail/forwardemail.net/master/assets/img/favicon.ico
+  - name: sqlite.forwardemail.net
+    url: sqlite.forwardemail.net
+    icon: https://sqlite.org/favicon.ico
     port: 22
     check: "tcp-ping"
 
