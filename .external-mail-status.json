@@ -6,7 +6,14 @@
       "createdAt": "2026-01-24T21:48:28.180Z",
       "lastUpdate": "2026-01-24T21:48:28.180Z",
       "resolvedAt": null
+    },
+    "microsoft-440abdde-1e93-484b-b1f3-585c959a0366": {
+      "issueNumber": 2437,
+      "isResolved": false,
+      "createdAt": "2026-03-06T15:46:45.173Z",
+      "lastUpdate": "2026-03-06T15:46:45.173Z",
+      "resolvedAt": null
     }
   },
-  "lastRun": "2026-03-06T15:22:48.741Z"
+  "lastRun": "2026-03-06T15:46:45.173Z"
 }
