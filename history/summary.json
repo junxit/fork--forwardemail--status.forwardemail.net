@@ -760,19 +760,19 @@
     "url": "pop3.forwardemail.net",
     "icon": "https://raw.githubusercontent.com/forwardemail/forwardemail.net/master/assets/img/favicon.ico",
     "slug": "pop3-forwardemail-net-2995-i-pv4",
-    "status": "down",
+    "status": "up",
     "uptime": "100.00%",
-    "uptimeDay": "99.86%",
-    "uptimeWeek": "99.98%",
-    "uptimeMonth": "100.00%",
+    "uptimeDay": "98.71%",
+    "uptimeWeek": "99.82%",
+    "uptimeMonth": "99.96%",
     "uptimeYear": "100.00%",
     "time": 47,
-    "timeDay": 28,
+    "timeDay": 38,
     "timeWeek": 43,
     "timeMonth": 47,
     "timeYear": 46,
     "dailyMinutesDown": {
-      "2026-03-07": 2
+      "2026-03-07": 19
     }
   },
   {
