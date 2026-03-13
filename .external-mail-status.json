@@ -7,13 +7,6 @@
       "lastUpdate": "2026-01-24T21:48:28.180Z",
       "resolvedAt": null
     },
-    "microsoft-fc9c9885-0f49-428d-9e7f-4dfa9fb3670f": {
-      "issueNumber": 2438,
-      "isResolved": true,
-      "createdAt": "2026-03-06T16:22:06.913Z",
-      "lastUpdate": "2026-03-06T16:22:06.913Z",
-      "resolvedAt": "2026-03-06T17:45:46.424Z"
-    },
     "microsoft-aed92473-53fb-48b1-8b56-a2666e5d5c53": {
       "issueNumber": 2439,
       "isResolved": true,
@@ -29,5 +22,5 @@
       "resolvedAt": "2026-03-10T23:37:03.435Z"
     }
   },
-  "lastRun": "2026-03-13T17:37:52.080Z"
+  "lastRun": "2026-03-13T17:54:44.974Z"
 }
