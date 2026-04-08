@@ -100,11 +100,11 @@
     },
     "google-224ozRqzW4sFBDK8hLnT": {
       "issueNumber": 2468,
-      "isResolved": false,
+      "isResolved": true,
       "createdAt": "2026-04-08T18:42:48.650Z",
       "lastUpdate": "2026-04-08T20:58:32.082Z",
-      "resolvedAt": null
+      "resolvedAt": "2026-04-08T23:06:49.386Z"
     }
   },
-  "lastRun": "2026-04-08T22:47:21.230Z"
+  "lastRun": "2026-04-08T23:06:49.386Z"
 }
