@@ -7,13 +7,6 @@
       "lastUpdate": "2026-01-24T21:48:28.180Z",
       "resolvedAt": null
     },
-    "google-224ozRqzW4sFBDK8hLnT": {
-      "issueNumber": 2468,
-      "isResolved": true,
-      "createdAt": "2026-04-08T18:42:48.650Z",
-      "lastUpdate": "2026-04-08T20:58:32.082Z",
-      "resolvedAt": "2026-04-08T23:06:49.386Z"
-    },
     "apple-1000005583": {
       "issueNumber": 2469,
       "isResolved": true,
@@ -22,5 +15,5 @@
       "resolvedAt": "2026-04-13T19:09:40.983Z"
     }
   },
-  "lastRun": "2026-04-15T22:47:21.565Z"
+  "lastRun": "2026-04-15T23:07:05.722Z"
 }
