@@ -16,11 +16,11 @@
     },
     "microsoft-ce46279f-4c16-4d69-9515-2a2019645832": {
       "issueNumber": 2470,
-      "isResolved": false,
+      "isResolved": true,
       "createdAt": "2026-04-16T12:40:30.584Z",
       "lastUpdate": "2026-04-16T12:40:30.584Z",
-      "resolvedAt": null
+      "resolvedAt": "2026-04-16T14:07:02.009Z"
     }
   },
-  "lastRun": "2026-04-16T13:19:16.926Z"
+  "lastRun": "2026-04-16T14:07:02.009Z"
 }
