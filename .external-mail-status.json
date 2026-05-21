@@ -13,7 +13,14 @@
       "createdAt": "2026-05-16T03:12:08.077Z",
       "lastUpdate": "2026-05-20T21:25:28.880Z",
       "resolvedAt": null
+    },
+    "google-CzVZ5zk2Gf2ixPSt6RT3": {
+      "issueNumber": 2474,
+      "isResolved": false,
+      "createdAt": "2026-05-21T15:39:16.870Z",
+      "lastUpdate": "2026-05-21T15:39:16.870Z",
+      "resolvedAt": null
     }
   },
-  "lastRun": "2026-05-21T14:20:00.639Z"
+  "lastRun": "2026-05-21T15:39:16.870Z"
 }
