@@ -9,10 +9,10 @@
     },
     "google-kWSuRqLdsXGzT7Qxjdmz": {
       "issueNumber": 2473,
-      "isResolved": false,
+      "isResolved": true,
       "createdAt": "2026-05-16T03:12:08.077Z",
       "lastUpdate": "2026-05-22T18:00:39.935Z",
-      "resolvedAt": null
+      "resolvedAt": "2026-05-22T19:25:02.681Z"
     },
     "google-CzVZ5zk2Gf2ixPSt6RT3": {
       "issueNumber": 2474,
@@ -22,5 +22,5 @@
       "resolvedAt": "2026-05-21T16:38:46.748Z"
     }
   },
-  "lastRun": "2026-05-22T18:49:11.414Z"
+  "lastRun": "2026-05-22T19:25:02.682Z"
 }
