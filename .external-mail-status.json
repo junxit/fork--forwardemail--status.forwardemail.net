@@ -7,13 +7,6 @@
       "lastUpdate": "2026-01-24T21:48:28.180Z",
       "resolvedAt": null
     },
-    "google-kWSuRqLdsXGzT7Qxjdmz": {
-      "issueNumber": null,
-      "isResolved": true,
-      "createdAt": "2026-05-29T20:36:46.607Z",
-      "lastUpdate": null,
-      "resolvedAt": "2026-05-29T20:36:46.607Z"
-    },
     "google-vagmms1y6yRxwg6RMQZp": {
       "issueNumber": null,
       "isResolved": true,
@@ -22,5 +15,5 @@
       "resolvedAt": "2026-05-31T05:21:02.618Z"
     }
   },
-  "lastRun": "2026-06-05T20:21:48.165Z"
+  "lastRun": "2026-06-05T21:04:31.684Z"
 }
