@@ -16,11 +16,11 @@
     },
     "microsoft-e2bff449-ce7b-4c53-b175-2dc52a8c9896": {
       "issueNumber": 2479,
-      "isResolved": false,
+      "isResolved": true,
       "createdAt": "2026-06-11T21:29:37.328Z",
       "lastUpdate": "2026-06-11T21:29:37.328Z",
-      "resolvedAt": null
+      "resolvedAt": "2026-06-11T22:16:12.366Z"
     }
   },
-  "lastRun": "2026-06-11T21:29:37.328Z"
+  "lastRun": "2026-06-11T22:16:12.366Z"
 }
